@@ -55,3 +55,43 @@ fn main() -> Result<(), exec::Error> {
 
     Err(exec::execvp("code", argv))
 }
+
+#[cfg(test)]
+mod tests {
+    use std::path::Path;
+
+    use crate::is_like_vscode_ipc_socket;
+
+    #[test]
+    fn test_is_like_vscode_ipc_socket() {
+        let cases = [
+            (
+                "/tmp/vscode-ipc-7dc5f21f-5139-4eb4-8dd6-c4479f10c312.sock",
+                true,
+            ),
+            (
+                "/var/tmp/vscode-ipc-7dc5f21f-5139-4eb4-8dd6-c4479f10c312.sock",
+                true,
+            ),
+            (
+                "/vscode-ipc-7dc5f21f-5139-4eb4-8dd6-c4479f10c312.sock",
+                true,
+            ),
+            (
+                "/vscode-ipc-7dc5f21f-5139-4eb4-8dd6-c4479f10c312.txt",
+                false,
+            ),
+            ("/vscode-7dc5f21f-5139-4eb4-8dd6-c4479f10c312.sock", false),
+        ];
+
+        for (idx, (path, expected)) in cases.into_iter().enumerate() {
+            let path = Path::new(path);
+            let got = is_like_vscode_ipc_socket(path);
+            assert_eq!(
+                got, expected,
+                "#{}: expecting {:?} for {:?}, but got {:?}",
+                idx, expected, path, got
+            );
+        }
+    }
+}
