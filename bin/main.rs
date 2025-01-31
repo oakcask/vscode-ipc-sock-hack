@@ -29,11 +29,7 @@ fn find_best_match_and_clean(socket_path: &str) -> io::Result<Option<String>> {
         return Ok(Some(sock));
     }
 
-    for p in path
-        .read_dir()?
-        .flatten()
-        .map(|ent| ent.path())
-    {
+    for p in path.read_dir()?.flatten().map(|ent| ent.path()) {
         if let Some(sock) = test_socket_and_clean(&p) {
             return Ok(Some(sock));
         }
