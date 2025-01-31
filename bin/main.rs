@@ -6,7 +6,7 @@ fn is_like_vscode_ipc_socket(path: &Path) -> bool {
             return basename.starts_with("vscode-ipc-") && basename.ends_with(".sock");
         }
     }
-    return false;
+    false
 }
 
 fn test_socket_and_clean<P: AsRef<Path>>(path: P) -> Option<String> {
@@ -31,9 +31,7 @@ fn find_best_match_and_clean(socket_path: &str) -> io::Result<Option<String>> {
 
     for p in path
         .read_dir()?
-        .into_iter()
-        .filter(Result::is_ok)
-        .map(|r| r.unwrap())
+        .flatten()
         .map(|ent| ent.path())
     {
         if let Some(sock) = test_socket_and_clean(&p) {
@@ -50,7 +48,7 @@ fn main() -> ! {
             std::env::set_var("VSCODE_IPC_HOOK_CLI", sock);
             let mut argv = Vec::new();
             argv.push(String::from("code"));
-            let argv = std::env::args().into_iter().fold(argv, |mut a, e| {
+            let argv = std::env::args().fold(argv, |mut a, e| {
                 a.push(e);
                 a
             });
