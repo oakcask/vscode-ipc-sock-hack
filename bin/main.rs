@@ -1,4 +1,4 @@
-use std::{fs, io, os::unix::net::UnixStream, path::Path, process::exit};
+use std::{fs, io, os::unix::net::UnixStream, path::Path};
 
 fn is_like_vscode_ipc_socket(path: &Path) -> bool {
     if let Some(basename) = path.file_name() {
@@ -12,7 +12,7 @@ fn is_like_vscode_ipc_socket(path: &Path) -> bool {
 fn test_socket_and_clean<P: AsRef<Path>>(path: P) -> Option<String> {
     let path = path.as_ref();
     if is_like_vscode_ipc_socket(path) {
-        if let Ok(_) = UnixStream::connect(path) {
+        if UnixStream::connect(path).is_ok() {
             if let Some(str) = path.as_os_str().to_str() {
                 return Some(str.to_owned());
             }
@@ -38,21 +38,20 @@ fn find_best_match_and_clean(socket_path: &str) -> io::Result<Option<String>> {
     Ok(None)
 }
 
-fn main() -> ! {
+fn main() -> Result<(), exec::Error> {
     if let Ok(sock) = std::env::var("VSCODE_IPC_HOOK_CLI") {
         if let Ok(Some(sock)) = find_best_match_and_clean(&sock) {
             std::env::set_var("VSCODE_IPC_HOOK_CLI", sock);
-            let mut argv = Vec::new();
-            argv.push(String::from("code"));
-            let argv = std::env::args().fold(argv, |mut a, e| {
-                a.push(e);
-                a
-            });
-            let e = exec::execvp("code", argv);
-            eprintln!("{:?}", e);
         }
     } else {
-        eprintln!("it seems you're not on remote. exitting.")
+        eprintln!("it seems you're not on remote.")
     }
-    exit(1)
+
+    let argv = vec![String::from("code")];
+    let argv = std::env::args().skip(1).fold(argv, |mut a, e| {
+        a.push(e);
+        a
+    });
+
+    Err(exec::execvp("code", argv))
 }
