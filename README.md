@@ -15,16 +15,41 @@ Error: connect ENOENT /tmp/vscode-ipc-7dc5f21f-5139-4eb4-8dd6-c4479f10c312.sock
 error: There was a problem with the editor 'code -w'.
 ```
 
-`vscode-ipc-sock-hack` is a shim command invokes `code` (VSCode's CLI command),
-but check the socket files and clean them up.
+`vscode-ipc-sock-hack` is a shim command invokes `code` (vscode's CLI command),
+but checks the socket files and cleans them up.
 
 Be wary, this command keep trying to connect(2) to a file with pattern `vscode-ipc-*.sock`
-where the `VSCODE_IPC_HOOK_CLI` points at, and files in the same directory.
-Then files will be deleted if failed to connect.
+where the `VSCODE_IPC_HOOK_CLI` points at, and files in the same directory too.
+Those files will be deleted after failing to connect.
+
+And please be noted: `vscode-ipc-sock-hack` doesn't aware whoever on the other side of socket.
+So there may be a small gap to delete wrong file.
+Yes, this is in rare case. Usually, those socket files are in `/tmp` with sticky bit
+which prevents from deletion by users not the owner.
 
 ## Installation
 
-```
+```sh
 cargo install --git https://github.com/oakcask/vscode-ipc-sock-hack.git
+```
+
+Aliasing is good hack to enable `vscode-ipc-sock-hack`,
+which never invokes the login shell so this alias is just ignored
+when `vscode-ipc-sock-hack` searches `code`.
+Never causes infinite loop.
+
+```sh
 alias code='vscode-ipc-sock-hack'
+```
+
+If you using `code -w` as EDITOR in vscode's intergrated terminal,
+don't forget editing `settings.json`:
+
+```diff
+  {
+    "terminal.integrated.env.linux": {
+-       "EDITOR": "code -w"
++       "EDITOR": "vscode-ipc-sock-hack -w"
+    }
+  }
 ```
