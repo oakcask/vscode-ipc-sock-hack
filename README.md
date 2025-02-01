@@ -42,7 +42,7 @@ Never causes infinite loop.
 alias code='vscode-ipc-sock-hack'
 ```
 
-If you using `code -w` as EDITOR in vscode's intergrated terminal,
+If you are using `code -w` as EDITOR in vscode's intergrated terminal,
 don't forget editing `settings.json`:
 
 ```diff
