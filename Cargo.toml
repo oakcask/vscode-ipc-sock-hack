@@ -6,6 +6,10 @@ edition = "2021"
 [dependencies]
 exec = "0.3.1"
 
+[dev-dependencies]
+tempfile = "3.16.0"
+uuid = { version = "1.12.1", features = ["v4", "fast-rng"] }
+
 [[bin]]
 name = "vscode-ipc-sock-hack"
 path = "bin/main.rs"
