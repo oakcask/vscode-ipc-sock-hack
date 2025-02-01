@@ -152,7 +152,7 @@ mod tests {
             assert!(!sock.exists());
             assert_eq!(n, sock2)
         } else {
-            panic!("expecting Ok(None) but got {:?}", got)
+            panic!("expecting Ok(Some({:?})) but got {:?}", sock2, got)
         }
     }
 }
