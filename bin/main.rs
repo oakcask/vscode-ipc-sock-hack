@@ -29,9 +29,11 @@ fn find_best_match_and_clean(socket_path: &str) -> io::Result<Option<String>> {
         return Ok(Some(sock));
     }
 
-    for p in path.read_dir()?.flatten().map(|ent| ent.path()) {
-        if let Some(sock) = test_socket_and_clean(&p) {
-            return Ok(Some(sock));
+    if let Some(dir) = path.parent() {
+        for p in dir.read_dir()?.flatten().map(|ent| ent.path()) {
+            if let Some(sock) = test_socket_and_clean(&p) {
+                return Ok(Some(sock));
+            }
         }
     }
 
@@ -58,9 +60,15 @@ fn main() -> Result<(), exec::Error> {
 
 #[cfg(test)]
 mod tests {
-    use std::path::Path;
+    use std::{os::unix::net::UnixListener, path::Path};
 
-    use crate::is_like_vscode_ipc_socket;
+    use uuid::Uuid;
+
+    use crate::{find_best_match_and_clean, is_like_vscode_ipc_socket};
+
+    fn gen_socket_name() -> String {
+        format!("vscode-ipc-{}.sock", Uuid::new_v4())
+    }
 
     #[test]
     fn test_is_like_vscode_ipc_socket() {
@@ -92,6 +100,59 @@ mod tests {
                 "#{}: expecting {:?} for {:?}, but got {:?}",
                 idx, expected, path, got
             );
+        }
+    }
+
+    #[test]
+    fn find_best_match_and_clean_connects_to_vscode_ipc_hook_cli() {
+        let tmpdir = tempfile::tempdir().unwrap();
+        // let perm = fs::unix::metadata(tmpdir.path()).permissions().unwrap();
+        let sock = tmpdir.path().join(gen_socket_name());
+        let sock = sock.as_path().as_os_str().to_str().unwrap();
+        let _listener = UnixListener::bind(sock).unwrap();
+
+        let got = find_best_match_and_clean(sock);
+        if let Ok(Some(n)) = &got {
+            assert_eq!(n, sock)
+        } else {
+            panic!("expecting Ok(Some({:?})) but got {:?}", sock, got)
+        }
+    }
+
+    #[test]
+    fn find_best_match_and_clean_returns_err_when_fails_to_connect_to_vscode_ipc_hook_cli() {
+        let tmpdir = tempfile::tempdir().unwrap();
+        // let perm = fs::unix::metadata(tmpdir.path()).permissions().unwrap();
+        let sock = tmpdir.path().join(gen_socket_name());
+        let _ = UnixListener::bind(&sock).unwrap(); // shutdown
+
+        let got = find_best_match_and_clean(sock.as_path().as_os_str().to_str().unwrap());
+        if let Ok(None) = &got {
+            // deletes the file
+            assert!(!sock.exists())
+        } else {
+            panic!("expecting Ok(None) but got {:?}", got)
+        }
+    }
+
+    #[test]
+    fn find_best_match_and_clean_does_not_fail_through_by_scanning_the_parent_dir_of_vscode_ipc_hook_cli(
+    ) {
+        let tmpdir = tempfile::tempdir().unwrap();
+        // let perm = fs::unix::metadata(tmpdir.path()).permissions().unwrap();
+        let sock = tmpdir.path().join(gen_socket_name());
+        let _ = UnixListener::bind(&sock).unwrap(); // shutdown
+        let sock2 = tmpdir.path().join(gen_socket_name());
+        let sock2 = sock2.as_os_str().to_str().unwrap();
+        let _listener = UnixListener::bind(sock2).unwrap();
+
+        let got = find_best_match_and_clean(sock.as_path().as_os_str().to_str().unwrap());
+        if let Ok(Some(n)) = &got {
+            // deletes the file
+            assert!(!sock.exists());
+            assert_eq!(n, sock2)
+        } else {
+            panic!("expecting Ok(None) but got {:?}", got)
         }
     }
 }
