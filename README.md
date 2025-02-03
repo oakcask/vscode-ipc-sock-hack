@@ -30,6 +30,12 @@ which prevents from deletion by users not the owner.
 ## Installation
 
 ```sh
+# Option 1. use pre-built binary (currently supports aarch64-unknown-linux only.)
+curl -sSL https://github.com/oakcask/vscode-ipc-sock-hack/releases/latest/download/aarch64-unknown-linux-gnu.tar.gz | tar zx -C /path/to/bin
+```
+
+```sh
+# Option 2. build by yourself
 cargo install --git https://github.com/oakcask/vscode-ipc-sock-hack.git
 ```
 
