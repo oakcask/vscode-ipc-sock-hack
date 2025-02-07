@@ -1,4 +1,23 @@
+use clap::Parser;
 use std::{fs, io, os::unix::net::UnixStream, path::Path};
+
+#[derive(Parser, Debug, PartialEq)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+    /// Command to execute (default: code)
+    #[arg(long, default_value = "code")]
+    exec: String,
+
+    /// Arguments to pass to the command
+    #[arg(allow_hyphen_values = true, trailing_var_arg = true)]
+    args: Vec<String>,
+}
+
+fn build_command_args(args: Args) -> (String, Vec<String>) {
+    let mut command_args = vec![args.exec.clone()];
+    command_args.extend(args.args);
+    (args.exec, command_args)
+}
 
 fn is_like_vscode_ipc_socket(path: &Path) -> bool {
     if let Some(basename) = path.file_name() {
@@ -49,19 +68,15 @@ fn main() -> Result<(), exec::Error> {
         eprintln!("it seems you're not on remote.")
     }
 
-    let argv = vec![String::from("code")];
-    let argv = std::env::args().skip(1).fold(argv, |mut a, e| {
-        a.push(e);
-        a
-    });
-
-    Err(exec::execvp("code", argv))
+    let args = Args::parse();
+    let (exec, command_args) = build_command_args(args);
+    Err(exec::execvp(&exec, command_args))
 }
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use std::{os::unix::net::UnixListener, path::Path};
-
     use uuid::Uuid;
 
     use crate::{find_best_match_and_clean, is_like_vscode_ipc_socket};
@@ -154,5 +169,74 @@ mod tests {
         } else {
             panic!("expecting Ok(Some({:?})) but got {:?}", sock2, got)
         }
+    }
+
+    #[test]
+    fn test_build_command_args() {
+        // 通常のケース
+        let args = Args {
+            exec: "cursor".to_string(),
+            args: vec!["file.txt".to_string()],
+        };
+        let (exec, command_args) = build_command_args(args);
+        assert_eq!(exec, "cursor", "exec command should be 'cursor'");
+        assert_eq!(
+            command_args,
+            vec!["cursor", "file.txt"],
+            "command args should contain the command name and file path"
+        );
+
+        // 引数なしのケース
+        let args = Args {
+            exec: "code".to_string(),
+            args: vec![],
+        };
+        let (exec, command_args) = build_command_args(args);
+        assert_eq!(exec, "code", "exec command should be 'code'");
+        assert_eq!(
+            command_args,
+            vec!["code"],
+            "command args should contain only the command name"
+        );
+
+        // 複数の引数があるケース
+        let args = Args {
+            exec: "cursor".to_string(),
+            args: vec![
+                "-r".to_string(),
+                "file1.txt".to_string(),
+                "file2.txt".to_string(),
+            ],
+        };
+        let (exec, command_args) = build_command_args(args);
+        assert_eq!(exec, "cursor", "exec command should be 'cursor'");
+        assert_eq!(
+            command_args,
+            vec!["cursor", "-r", "file1.txt", "file2.txt"],
+            "command args should contain all arguments in order"
+        );
+    }
+
+    #[test]
+    fn test_args_parsing() {
+        // オプションを含むケース
+        let args =
+            Args::try_parse_from(["program", "--exec", "cursor", "-r", "--wait", "file.txt"])
+                .unwrap();
+        assert_eq!(args.exec, "cursor", "exec should be set to 'cursor'");
+        assert_eq!(
+            args.args,
+            vec!["-r", "--wait", "file.txt"],
+            "args should contain all options and the file path"
+        );
+
+        // デフォルト値のテスト（オプション付き）
+        let default_args = Args::try_parse_from(["program", "--wait", "file.txt"]).unwrap();
+        assert_eq!(default_args.exec, "code", "exec should default to 'code'");
+        assert_eq!(
+            default_args.args,
+            vec!["--wait", "file.txt"],
+            "args should contain the option and file path"
+        );
     }
 }
