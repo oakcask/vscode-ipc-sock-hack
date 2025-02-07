@@ -1,5 +1,5 @@
-use std::{fs, io, os::unix::net::UnixStream, path::Path};
 use clap::Parser;
+use std::{fs, io, os::unix::net::UnixStream, path::Path};
 
 #[derive(Parser, Debug, PartialEq)]
 #[command(author, version, about, long_about = None)]
@@ -202,7 +202,11 @@ mod tests {
         // 複数の引数があるケース
         let args = Args {
             exec: "cursor".to_string(),
-            args: vec!["-r".to_string(), "file1.txt".to_string(), "file2.txt".to_string()],
+            args: vec![
+                "-r".to_string(),
+                "file1.txt".to_string(),
+                "file2.txt".to_string(),
+            ],
         };
         let (exec, command_args) = build_command_args(args);
         assert_eq!(exec, "cursor", "exec command should be 'cursor'");
@@ -216,13 +220,23 @@ mod tests {
     #[test]
     fn test_args_parsing() {
         // オプションを含むケース
-        let args = Args::try_parse_from(["program", "--exec", "cursor", "-r", "--wait", "file.txt"]).unwrap();
+        let args =
+            Args::try_parse_from(["program", "--exec", "cursor", "-r", "--wait", "file.txt"])
+                .unwrap();
         assert_eq!(args.exec, "cursor", "exec should be set to 'cursor'");
-        assert_eq!(args.args, vec!["-r", "--wait", "file.txt"], "args should contain all options and the file path");
+        assert_eq!(
+            args.args,
+            vec!["-r", "--wait", "file.txt"],
+            "args should contain all options and the file path"
+        );
 
         // デフォルト値のテスト（オプション付き）
         let default_args = Args::try_parse_from(["program", "--wait", "file.txt"]).unwrap();
         assert_eq!(default_args.exec, "code", "exec should default to 'code'");
-        assert_eq!(default_args.args, vec!["--wait", "file.txt"], "args should contain the option and file path");
+        assert_eq!(
+            default_args.args,
+            vec!["--wait", "file.txt"],
+            "args should contain the option and file path"
+        );
     }
 }
