@@ -38,4 +38,4 @@ jobs:
           title: Release v${{ needs.get-next-version.outputs.new-release-version }}
           body: Releases v${{ needs.get-next-version.outputs.new-release-version }}
           commit-message: "chore: release v${{ needs.get-next-version.outputs.new-release-version }}"
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.CI_TOKEN }}
