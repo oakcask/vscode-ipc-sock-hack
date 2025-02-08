@@ -15,7 +15,7 @@ Error: connect ENOENT /tmp/vscode-ipc-7dc5f21f-5139-4eb4-8dd6-c4479f10c312.sock
 error: There was a problem with the editor 'code -w'.
 ```
 
-`vscode-ipc-sock-hack` is a shim command invokes `code` (vscode's CLI command),
+`vscode-ipc-sock-hack` is a shim command invokes `code` (VS Code's CLI command),
 but checks the socket files and cleans them up.
 
 Be wary, this command keep trying to connect(2) to a file with pattern `vscode-ipc-*.sock`
@@ -48,7 +48,7 @@ Never causes infinite loop.
 alias code='vscode-ipc-sock-hack'
 ```
 
-If you are using `code -w` as EDITOR in vscode's intergrated terminal,
+If you are using `code -w` as EDITOR in VS Code's intergrated terminal,
 don't forget editing `settings.json`:
 
 ```diff
@@ -58,4 +58,18 @@ don't forget editing `settings.json`:
 +       "EDITOR": "vscode-ipc-sock-hack -w"
     }
   }
+```
+
+## Using VS Code Clones
+
+If you use one of VS Code clones like [Cursor](https://www.cursor.com/),
+use `--exec` option to change the entrypoint.
+
+I eventually found out that the `VSCODE_IPC_HOOK_CLI` environment variable is even used by
+Cursor with Remote Extension.
+Thinking other clones are alike.
+So all need is swap the entrypoint to invoke.
+
+```sh
+alias code='vscode-ipc-sock-hack --exec cursor'
 ```
