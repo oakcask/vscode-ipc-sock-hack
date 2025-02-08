@@ -68,8 +68,8 @@ use `--exec` option to change the entrypoint.
 I eventually found out that the `VSCODE_IPC_HOOK_CLI` environment variable is even used by
 Cursor with Remote Extension.
 Thinking other clones are alike.
-So all need is swap the entrypoint to invoke.
+So all you need is to swap the entrypoint to invoke.
 
 ```sh
-alias code='vscode-ipc-sock-hack --exec cursor'
+alias cursor='vscode-ipc-sock-hack --exec cursor'
 ```
