@@ -31,6 +31,11 @@ jobs:
       - name: Prepare semantic-release for Rust
         run: semantic-release-cargo prepare ${{ needs.get-next-version.outputs.new-release-version }}
         if: needs.get-next-version.outputs.new-release-published == 'true'
+      - id: gh-token-gen
+        uses: oakcask/gh-token-gen@v1.0.2
+        with:
+          app-id: ${{ secrets.TOKEN_GEN_APP_ID }}
+          private-key: ${{ secrets.TOKEN_GEN_PRIVATE_KEY }}
       - name: Create pull request to release
         uses: int128/update-generated-files-action@v2
         if: needs.get-next-version.outputs.new-release-published == 'true'
@@ -38,4 +43,4 @@ jobs:
           title: Release v${{ needs.get-next-version.outputs.new-release-version }}
           body: Releases v${{ needs.get-next-version.outputs.new-release-version }}
           commit-message: "chore: release v${{ needs.get-next-version.outputs.new-release-version }}"
-          token: ${{ secrets.CI_TOKEN }}
+          token: ${{ steps.gh-token-gen.outputs.token }}
