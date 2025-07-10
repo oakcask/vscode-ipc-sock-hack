@@ -112,8 +112,7 @@ mod tests {
             let got = is_like_vscode_ipc_socket(path);
             assert_eq!(
                 got, expected,
-                "#{}: expecting {:?} for {:?}, but got {:?}",
-                idx, expected, path, got
+                "#{idx}: expecting {expected:?} for {path:?}, but got {got:?}"
             );
         }
     }
@@ -130,7 +129,7 @@ mod tests {
         if let Ok(Some(n)) = &got {
             assert_eq!(n, sock)
         } else {
-            panic!("expecting Ok(Some({:?})) but got {:?}", sock, got)
+            panic!("expecting Ok(Some({sock:?})) but got {got:?}")
         }
     }
 
@@ -146,7 +145,7 @@ mod tests {
             // deletes the file
             assert!(!sock.exists())
         } else {
-            panic!("expecting Ok(None) but got {:?}", got)
+            panic!("expecting Ok(None) but got {got:?}")
         }
     }
 
@@ -167,7 +166,7 @@ mod tests {
             assert!(!sock.exists());
             assert_eq!(n, sock2)
         } else {
-            panic!("expecting Ok(Some({:?})) but got {:?}", sock2, got)
+            panic!("expecting Ok(Some({sock2:?})) but got {got:?}")
         }
     }
 
