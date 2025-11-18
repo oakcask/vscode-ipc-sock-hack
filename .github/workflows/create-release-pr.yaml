@@ -11,7 +11,7 @@ jobs:
   get-next-version:
     permissions:
       contents: write
-    uses: semantic-release-action/next-release-version/.github/workflows/next-release-version.yml@v4
+    uses: semantic-release-action/next-release-version/.github/workflows/next-release-version.yml@0cdefe1224944c23645e5131f7a5189672c0df92 # v4
 
   update-version:
     runs-on: ubuntu-latest
@@ -21,10 +21,10 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
 
       - name: Install semantic-release-cargo
-        uses: EricCrosson/install-github-release-binary@v2
+        uses: EricCrosson/install-github-release-binary@3b6741ed37d8bdb9539ff5234f8c3b70805d04b5 # v2
         with:
           targets: semantic-release-cargo/semantic-release-cargo@v2.2.96
         if: needs.get-next-version.outputs.new-release-published == 'true'
@@ -32,12 +32,12 @@ jobs:
         run: semantic-release-cargo prepare ${{ needs.get-next-version.outputs.new-release-version }}
         if: needs.get-next-version.outputs.new-release-published == 'true'
       - id: gh-token-gen
-        uses: oakcask/gh-token-gen@v3.1.10
+        uses: oakcask/gh-token-gen@3c87b3575883319ffabeaedf8ddc5ced6f67fae1 # v3.1.10
         with:
           app-id: ${{ secrets.TOKEN_GEN_APP_ID }}
           private-key: ${{ secrets.TOKEN_GEN_PRIVATE_KEY }}
       - name: Create pull request to release
-        uses: int128/update-generated-files-action@v2
+        uses: int128/update-generated-files-action@d9aac571db84cee6c16fa20190621e9deb2bc575 # v2
         if: needs.get-next-version.outputs.new-release-published == 'true'
         with:
           title: Release v${{ needs.get-next-version.outputs.new-release-version }}
