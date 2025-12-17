@@ -23,7 +23,7 @@ jobs:
       updated: ${{ steps.check-updated.outputs.updated }}
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-      - uses: EricCrosson/install-github-release-binary@563c9eaa828d50bc19e7d6bfadae4b7bfd32ad4a # v2
+      - uses: EricCrosson/install-github-release-binary@a5c56f5ead92cd085677c6eda6dcc49ddb5f69c7 # v2
         with:
           targets: semantic-release-cargo/semantic-release-cargo@v2.2.96
         if: needs.get-next-version.outputs.new-release-published == 'true'
