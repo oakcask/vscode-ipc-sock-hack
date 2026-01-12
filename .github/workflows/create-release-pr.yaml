@@ -24,7 +24,7 @@ jobs:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
 
       - name: Install semantic-release-cargo
-        uses: EricCrosson/install-github-release-binary@a5c56f5ead92cd085677c6eda6dcc49ddb5f69c7 # v2
+        uses: EricCrosson/install-github-release-binary@d112ecda171fde1bf62a8603d5dfee1840ebe68a # v2
         with:
           targets: semantic-release-cargo/semantic-release-cargo@v2.2.96
         if: needs.get-next-version.outputs.new-release-published == 'true'
