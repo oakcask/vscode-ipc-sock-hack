@@ -22,7 +22,7 @@ jobs:
     outputs:
       updated: ${{ steps.check-updated.outputs.updated }}
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: EricCrosson/install-github-release-binary@4d17b6c89b10ee2f9deec00a6d594af10d0a4852 # v2
         with:
           targets: semantic-release-cargo/semantic-release-cargo@v2.2.96
@@ -49,7 +49,7 @@ jobs:
     env:
       CARGO: "cargo"
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1
       - name: Enable cross
         run: cargo install cross && echo "CARGO=cross" >> "$GITHUB_ENV"
@@ -84,7 +84,7 @@ jobs:
       - build
     if: ${{ needs.get-next-version.outputs.new-release-published == 'true' && needs.cargo-toml-updated.outputs.updated == 'true' }}
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           path: dist
